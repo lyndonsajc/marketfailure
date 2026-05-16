@@ -314,9 +314,9 @@
       <div class="graph-top">
         <div>
           <h2 class="section-title" id="graphTitle">Cost-side market failure</h2>
-          <div class="small-note" id="graphSubtitle">Both external cost and underestimated private cost can cause over-production.</div>
+          <div class="small-note" id="graphSubtitle">Both external cost and underestimated private cost can cause overconsumption.</div>
         </div>
-        <div class="badge" id="outcomeBadge">Over-production</div>
+        <div class="badge" id="outcomeBadge">Overconsumption</div>
       </div>
 
       <canvas id="graph" width="900" height="520"></canvas>
@@ -571,7 +571,7 @@
         drawLine(msc, p, '#dc2626', 'MSC');
         els.graphTitle.textContent = 'Cost-side market failure: external cost + information gap';
         els.graphSubtitle.textContent = 'Actual MPC is above perceived MPC, and MSC is further above actual MPC due to external cost.';
-        els.outcomeBadge.textContent = 'Over-production';
+        els.outcomeBadge.textContent = 'Overconsumption';
       } else {
         drawLine(mpbPerceived, p, '#2563eb', 'MPB perceived');
         drawLine(mpbActual, p, '#f59e0b', 'MPB actual', [7, 5]);
@@ -579,7 +579,7 @@
         drawLine(mpcPerceived, p, '#059669', 'MPC = MSC');
         els.graphTitle.textContent = 'Benefit-side market failure: external benefit + information gap';
         els.graphSubtitle.textContent = 'Actual MPB is above perceived MPB, and MSB is further above actual MPB due to external benefit.';
-        els.outcomeBadge.textContent = 'Under-consumption';
+        els.outcomeBadge.textContent = 'Underconsumption';
       }
 
       drawGuides(market, '#111827', 'Market equilibrium');
@@ -591,10 +591,10 @@
 
       if (mode === 'cost') {
         const over = Math.max(0, market.q - social.q);
-        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPC</strong>, so it produces where perceived MPB = perceived MPC. However, actual MPC is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSC is another <strong>${money(p.ext)}</strong> higher because of external cost. Total unaccounted cost is <strong>${money(totalGap)} per unit</strong>, causing over-production of <strong>${qty(over)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
+        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPC</strong>, so it produces where perceived MPB = perceived MPC. However, actual MPC is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSC is another <strong>${money(p.ext)}</strong> higher because of external cost. Total unaccounted cost is <strong>${money(totalGap)} per unit</strong>, causing overconsumption of <strong>${qty(over)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
       } else {
         const under = Math.max(0, social.q - market.q);
-        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPB</strong>, so it consumes where perceived MPB = MPC. However, actual MPB is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSB is another <strong>${money(p.ext)}</strong> higher because of external benefit. Total unaccounted benefit is <strong>${money(totalGap)} per unit</strong>, causing under-consumption of <strong>${qty(under)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
+        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPB</strong>, so it consumes where perceived MPB = MPC. However, actual MPB is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSB is another <strong>${money(p.ext)}</strong> higher because of external benefit. Total unaccounted benefit is <strong>${money(totalGap)} per unit</strong>, causing underconsumption of <strong>${qty(under)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
       }
       updateLegend();
     }
