@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>H2 Economics Market Failure Visualiser</title>
+  <title>Externality and Information Failure</title>
   <style>
     :root {
       --bg: #f6f7fb;
@@ -257,8 +257,8 @@
 </head>
 <body>
   <header>
-    <h1>H2 Economics Market Failure Visualiser</h1>
-    <p class="subtitle">For JC1 A-Level Economics: use the sliders to simulate how <strong>externalities</strong> and <strong>information gaps</strong> can exist together in the same market. Students compare the free-market equilibrium based on perceived private costs/benefits with the socially optimal equilibrium based on social costs/benefits.</p>
+    <h1>Externality and Information Failure</h1>
+    <p class="subtitle">H1 H2 Microeconomic Policies</p>
   </header>
 
   <main>
@@ -407,16 +407,23 @@
     function compute() {
       const p = getParams();
       const market = intersection(p.A, -p.dSlope, p.C, p.sSlope);
+
+      // Intersection using actual private cost/benefit before externalities
+      let actualPrivate;
+
       let social;
       if (mode === 'cost') {
+        actualPrivate = intersection(p.A, -p.dSlope, p.C + p.info, p.sSlope);
         social = intersection(p.A, -p.dSlope, p.C + p.info + p.ext, p.sSlope);
       } else {
+        actualPrivate = intersection(p.A + p.info, -p.dSlope, p.C, p.sSlope);
         social = intersection(p.A + p.info + p.ext, -p.dSlope, p.C, p.sSlope);
       }
+
       const totalGap = p.info + p.ext;
       const quantityGap = Math.abs(market.q - social.q);
       const dwl = 0.5 * totalGap * quantityGap;
-      return { p, market, social, totalGap, quantityGap, dwl };
+      return { p, market, actualPrivate, social, totalGap, quantityGap, dwl };
     }
 
     function xScale(q) {
@@ -486,7 +493,7 @@
       ctx.restore();
     }
 
-    function drawGuides(point, color, text) {
+    function drawGuides(point, color, text, quantityLabel, priceLabel) {
       ctx.save();
       ctx.strokeStyle = color;
       ctx.lineWidth = 1.5;
@@ -503,6 +510,13 @@
       ctx.fill();
       ctx.font = 'bold 13px Arial';
       ctx.fillText(text, xScale(point.q) + 8, yScale(point.price) - 8);
+
+      // Label quantities on horizontal axis
+      ctx.font = 'bold 14px Arial';
+      ctx.fillText(quantityLabel, xScale(point.q) - 10, yScale(0) + 40);
+
+      // Label prices on vertical axis
+      ctx.fillText(priceLabel, xScale(0) - 38, yScale(point.price) + 5);
       ctx.restore();
     }
 
@@ -556,7 +570,7 @@
 
     function render() {
       const data = compute();
-      const { p, market, social, totalGap, dwl } = data;
+      const { p, market, actualPrivate, social, totalGap, dwl } = data;
       els.demandInterceptValue.textContent = money(p.A);
       els.supplyInterceptValue.textContent = money(p.C);
       els.externalityValue.textContent = money(p.ext);
@@ -582,8 +596,9 @@
         els.outcomeBadge.textContent = 'Underconsumption';
       }
 
-      drawGuides(market, '#111827', 'Market equilibrium');
-      drawGuides(social, '#f59e0b', 'Social optimum');
+      drawGuides(market, '#111827', 'Market equilibrium', mode === 'cost' ? 'Q2' : 'Q0', mode === 'cost' ? 'P2' : 'P0');
+      drawGuides(actualPrivate, '#f59e0b', mode === 'cost' ? 'MPB = MPC actual' : 'MPB actual = MPC', 'Q1', 'P1');
+      drawGuides(social, '#dc2626', 'MSC = MSB', 'Qs', 'Ps');
       els.qmStat.textContent = qty(market.q);
       els.qsStat.textContent = qty(social.q);
       els.gapStat.textContent = money(totalGap) + ' per unit';
