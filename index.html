@@ -106,8 +106,15 @@
     </div>
 
     <div class="grid">
+      <div>
       <div class="panel">
         <svg id="chart" viewBox="0 0 860 590" aria-label="Interactive market failure diagram"></svg>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <div style="font-size:18px;font-weight:850;margin-bottom:10px;color:#0f172a">Explanation of Market Failure</div>
+        <div id="explanationBox" style="line-height:1.7;font-size:14px;color:#374151"></div>
+      </div>
       </div>
 
       <div class="panel">
@@ -503,6 +510,30 @@ function draw(){
     weight:900,
     anchor:'middle'
   });
+
+  const explanation = [];
+
+  if(s.externalCost){
+    explanation.push(`<b>External costs ignored by consumers:</b> Consumers only consider their private costs (MPC) but ignore the external costs imposed on third parties. For example, smokers and vapers may ignore the harm caused by second-hand smoke and vapour to nearby non-smokers. This causes MSC to exceed MPC, leading to overconsumption.`);
+  }
+
+  if(s.costInfoGap){
+    explanation.push(`<b>Incorrect perception of costs:</b> Consumers underestimate the true private costs of consumption. For example, smokers and vapers may underestimate the long-term healthcare costs and addiction risks associated with smoking and vaping. As a result, perceived MPC is lower than actual MPC, leading to overconsumption.`);
+  }
+
+  if(s.externalBenefit){
+    explanation.push(`<b>External benefits ignored by consumers:</b> Consumers only consider their private benefits (MPB) but ignore the benefits enjoyed by third parties. For example, vaccination benefits society by reducing disease transmission to others. This causes MSB to exceed MPB, leading to underconsumption.`);
+  }
+
+  if(s.benefitInfoGap){
+    explanation.push(`<b>Incorrect perception of benefits:</b> Consumers underestimate the true benefits they receive from consumption. For example, individuals may underestimate the protection and long-term health benefits provided by vaccination. As a result, perceived MPB is lower than actual MPB, causing underconsumption.`);
+  }
+
+  if(explanation.length===0){
+    explanation.push(`<b>Allocative efficiency:</b> All decision-makers fully account for all social costs and social benefits. MSC = MPC and MSB = MPB. Consumers and producers also perceive costs and benefits accurately, resulting in the socially optimal quantity Qs.`);
+  }
+
+  document.getElementById('explanationBox').innerHTML = explanation.map(p=>`<div style="margin-bottom:14px">${p}</div>`).join('');
 }
 
 document.querySelectorAll('.choice-row input').forEach(input=>input.addEventListener('change',()=>{
