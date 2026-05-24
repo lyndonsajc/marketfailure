@@ -3,636 +3,515 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Externality and Information Failure</title>
+  <title>Market Failure: Externalities and Information Gaps</title>
   <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --ink: #1f2937;
-      --muted: #6b7280;
-      --line: #d1d5db;
-      --accent: #2563eb;
-      --good: #059669;
-      --bad: #dc2626;
-      --warn: #d97706;
-      --shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-      --radius: 18px;
+    :root{
+      --bg:#f7f8fb;
+      --card:#ffffff;
+      --ink:#1f2937;
+      --muted:#6b7280;
+      --grid:#e5e7eb;
+      --blue:#2563eb;
+      --red:#dc2626;
+      --green:#16a34a;
+      --purple:#7c3aed;
+      --orange:#ea580c;
+      --cost:#ef4444;
+      --benefit:#2563eb;
     }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #eef2ff 0%, var(--bg) 36%);
-      color: var(--ink);
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:linear-gradient(135deg,#eef2ff,#f8fafc 45%,#ecfeff);
+      color:var(--ink);
     }
-
-    header {
-      padding: 28px 20px 16px;
-      max-width: 1200px;
-      margin: 0 auto;
+    .wrap{max-width:1180px;margin:0 auto;padding:22px}
+    .header{
+      background:rgba(255,255,255,.85);
+      border:1px solid rgba(148,163,184,.35);
+      border-radius:22px;
+      padding:18px 22px;
+      box-shadow:0 12px 30px rgba(15,23,42,.08);
+      margin-bottom:16px;
     }
-
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
-      letter-spacing: -0.03em;
+    h1{font-size:25px;margin:0 0 6px;font-weight:800}
+    .subtitle{margin:0;color:var(--muted);font-size:14px;line-height:1.45}
+    .grid{display:grid;grid-template-columns:1.45fr .95fr;gap:16px;align-items:start}
+    .panel{
+      background:rgba(255,255,255,.92);
+      border:1px solid rgba(148,163,184,.35);
+      border-radius:22px;
+      padding:16px;
+      box-shadow:0 12px 30px rgba(15,23,42,.08);
     }
-
-    .subtitle {
-      color: var(--muted);
-      max-width: 850px;
-      line-height: 1.5;
-      font-size: 1rem;
+    svg{width:100%;height:auto;display:block;background:white;border-radius:18px;border:1px solid #e5e7eb}
+    .controls{display:grid;gap:12px}
+    .control{
+      border:1px solid #e5e7eb;
+      border-radius:16px;
+      padding:12px;
+      background:#fbfdff;
     }
-
-    main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 12px 20px 36px;
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 18px;
+    .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+    label{font-weight:750;font-size:14px}
+    .value{font-variant-numeric:tabular-nums;font-weight:800;background:#f1f5f9;padding:3px 8px;border-radius:999px;font-size:13px}
+    input[type="range"]{width:100%;accent-color:#2563eb}
+    .choice-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px}
+    .choice-row input{display:none}
+    .choice-row label{
+      text-align:center;
+      border:1px solid #e5e7eb;
+      border-radius:999px;
+      padding:8px 10px;
+      background:#f8fafc;
+      cursor:pointer;
+      font-size:13px;
+      font-weight:800;
+      color:#475569;
     }
-
-    @media (max-width: 930px) {
-      main { grid-template-columns: 1fr; }
+    .choice-row input:checked + label{
+      background:#111827;
+      color:white;
+      border-color:#111827;
+      box-shadow:0 6px 14px rgba(15,23,42,.16);
     }
-
-    .card {
-      background: rgba(255, 255, 255, 0.92);
-      border: 1px solid rgba(209, 213, 219, 0.75);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
+    .hint{font-size:12px;color:var(--muted);line-height:1.35;margin-top:6px}
+    .legend{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px;font-size:12px;color:#374151}
+    .leg{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:8px}
+    .sw{width:18px;height:4px;border-radius:99px}
+    .summary{margin-top:12px;background:#f8fafc;border:1px solid #e5e7eb;border-radius:16px;padding:12px;font-size:13px;line-height:1.55;color:#374151}
+    .summary b{color:#111827}
+    button{
+      border:0;border-radius:14px;padding:10px 12px;background:#111827;color:white;font-weight:800;cursor:pointer;
+      box-shadow:0 8px 18px rgba(15,23,42,.18);
     }
-
-    .panel {
-      padding: 18px;
-      position: sticky;
-      top: 14px;
-      align-self: start;
-    }
-
-    @media (max-width: 930px) {
-      .panel { position: static; }
-    }
-
-    .section-title {
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin: 0 0 12px;
-    }
-
-    .mode-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    button {
-      border: 1px solid var(--line);
-      background: white;
-      color: var(--ink);
-      padding: 10px 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 700;
-      transition: 0.18s ease;
-    }
-
-    button:hover { transform: translateY(-1px); }
-    button.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-
-    .slider-block {
-      padding: 13px 0;
-      border-top: 1px solid #eef0f4;
-    }
-
-    .slider-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 10px;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-
-    label {
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .value-pill {
-      background: #eef2ff;
-      color: #1d4ed8;
-      border-radius: 999px;
-      padding: 4px 8px;
-      font-weight: 700;
-      font-size: 0.82rem;
-      white-space: nowrap;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      accent-color: var(--accent);
-    }
-
-    .small-note {
-      font-size: 0.82rem;
-      color: var(--muted);
-      line-height: 1.35;
-      margin-top: 5px;
-    }
-
-    .graph-card { padding: 18px; }
-
-    .graph-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: start;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .badge {
-      border-radius: 999px;
-      padding: 7px 10px;
-      background: #ecfdf5;
-      color: #047857;
-      font-weight: 700;
-      font-size: 0.82rem;
-      white-space: nowrap;
-    }
-
-    canvas {
-      width: 100%;
-      height: 470px;
-      border-radius: 16px;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      display: block;
-    }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    @media (max-width: 760px) {
-      .stats { grid-template-columns: repeat(2, 1fr); }
-      canvas { height: 380px; }
-    }
-
-    .stat {
-      padding: 13px;
-      border-radius: 14px;
-      background: #f9fafb;
-      border: 1px solid #edf0f4;
-    }
-
-    .stat .label {
-      font-size: 0.78rem;
-      color: var(--muted);
-      margin-bottom: 5px;
-    }
-
-    .stat .num {
-      font-size: 1.25rem;
-      font-weight: 800;
-    }
-
-    .feedback {
-      margin-top: 14px;
-      padding: 16px;
-      border-radius: 16px;
-      background: #fffbeb;
-      border: 1px solid #fde68a;
-      line-height: 1.55;
-    }
-
-    .feedback strong { color: #92400e; }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 10px;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-
-    .key {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #f9fafb;
-      border: 1px solid #edf0f4;
-      padding: 6px 8px;
-      border-radius: 999px;
-    }
-
-    .swatch {
-      width: 18px;
-      height: 3px;
-      border-radius: 999px;
-      display: inline-block;
-    }
-
-    .footer-note {
-      max-width: 1200px;
-      margin: 0 auto 34px;
-      padding: 0 20px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      line-height: 1.5;
-    }
+    button.secondary{background:#e5e7eb;color:#111827;box-shadow:none}
+    .buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .tag{font-size:12px;color:#475569;background:#eef2ff;border:1px solid #c7d2fe;border-radius:999px;padding:4px 8px;display:inline-block;margin-top:8px}
+    @media(max-width:900px){.grid{grid-template-columns:1fr}.legend{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Externality and Information Failure</h1>
-    <p class="subtitle">H1 H2 Microeconomic Policies</p>
-  </header>
+  <div class="wrap">
+    <div class="header">
+      <h1>Market Failure: External Cost, External Benefit and Information Gaps</h1>
+      <p class="subtitle">Use the sliders to show how private decisions can differ from the socially optimal outcome due to externalities and imperfect information.</p>
+      <span class="tag">Teaching focus: MPC, MSC, MPB, MSB, perceived cost and perceived benefit</span>
+    </div>
 
-  <main>
-    <aside class="card panel">
-      <h2 class="section-title">1. Choose diagram type</h2>
-      <div class="mode-grid">
-        <button id="costSideBtn" class="active">Cost-side failure</button>
-        <button id="benefitSideBtn">Benefit-side failure</button>
+    <div class="grid">
+      <div class="panel">
+        <svg id="chart" viewBox="0 0 860 590" aria-label="Interactive market failure diagram"></svg>
       </div>
 
-      <div class="slider-block">
-        <div class="slider-head">
-          <label for="demandIntercept">Demand / perceived MPB intercept</label>
-          <span class="value-pill" id="demandInterceptValue"></span>
-        </div>
-        <input type="range" id="demandIntercept" min="100" max="220" value="170" />
-        <div class="small-note">Higher value means consumers appear willing and able to pay more at each quantity.</div>
-      </div>
+      <div class="panel">
+        <div class="controls">
+          <div class="control cost">
+            <div class="row"><label>Cost-side market failure</label></div>
 
-      <div class="slider-block">
-        <div class="slider-head">
-          <label for="supplyIntercept">Supply / perceived MPC intercept</label>
-          <span class="value-pill" id="supplyInterceptValue"></span>
-        </div>
-        <input type="range" id="supplyIntercept" min="0" max="90" value="35" />
-        <div class="small-note">Higher value means producers appear to require a higher price to produce each quantity.</div>
-      </div>
+            <div class="row"><label>External cost gap: MSC − MPC</label><span class="value" id="externalCostVal">Without gap</span></div>
+            <div class="choice-row">
+              <input type="radio" name="externalCostChoice" id="externalCostOff" value="0" checked>
+              <label for="externalCostOff">Assume MSC = MPC</label>
+              <input type="radio" name="externalCostChoice" id="externalCostOn" value="45">
+              <label for="externalCostOn">External costs exist</label>
+            </div>
 
-      <div class="slider-block">
-        <div class="slider-head">
-          <label for="externality">External cost / benefit per unit</label>
-          <span class="value-pill" id="externalityValue"></span>
-        </div>
-        <input type="range" id="externality" min="0" max="70" value="25" />
-        <div class="small-note">Cost-side: MEC shifts MSC above MPC actual. Benefit-side: MEB shifts MSB above MPB actual.</div>
-      </div>
+            <div class="row" style="margin-top:12px"><label>Cost information gap</label><span class="value" id="costInfoGapVal">Without gap</span></div>
+            <div class="choice-row">
+              <input type="radio" name="costInfoGapChoice" id="costInfoGapOff" value="0" checked>
+              <label for="costInfoGapOff">Assume no cost info gap</label>
+              <input type="radio" name="costInfoGapChoice" id="costInfoGapOn" value="35">
+              <label for="costInfoGapOn">Cost info gap exists</label>
+            </div>
 
-      <div class="slider-block">
-        <div class="slider-head">
-          <label for="infoGap">Information gap per unit</label>
-          <span class="value-pill" id="infoGapValue"></span>
-        </div>
-        <input type="range" id="infoGap" min="0" max="70" value="20" />
-        <div class="small-note">Cost-side: actual MPC &gt; perceived MPC. Benefit-side: actual MPB &gt; perceived MPB.</div>
-      </div>
+            <div class="hint">Adjust external costs and underestimation of costs together.</div>
+          </div>
 
-      <div class="slider-block">
-        <button id="resetBtn" style="width: 100%;">Reset simulation</button>
-      </div>
-    </aside>
+          <div class="control benefit">
+            <div class="row"><label>Benefit-side market failure</label></div>
 
-    <section class="card graph-card">
-      <div class="graph-top">
-        <div>
-          <h2 class="section-title" id="graphTitle">Cost-side market failure</h2>
-          <div class="small-note" id="graphSubtitle">Both external cost and underestimated private cost can cause overconsumption.</div>
-        </div>
-        <div class="badge" id="outcomeBadge">Overconsumption</div>
-      </div>
+            <div class="row"><label>External benefit gap: MSB − MPB</label><span class="value" id="externalBenefitVal">Without gap</span></div>
+            <div class="choice-row">
+              <input type="radio" name="externalBenefitChoice" id="externalBenefitOff" value="0" checked>
+              <label for="externalBenefitOff">Assume MSB = MPB</label>
+              <input type="radio" name="externalBenefitChoice" id="externalBenefitOn" value="45">
+              <label for="externalBenefitOn">External benefits exist</label>
+            </div>
 
-      <canvas id="graph" width="900" height="520"></canvas>
-      <div class="legend" id="legend"></div>
+            <div class="row" style="margin-top:12px"><label>Benefit information gap</label><span class="value" id="benefitInfoGapVal">Without gap</span></div>
+            <div class="choice-row">
+              <input type="radio" name="benefitInfoGapChoice" id="benefitInfoGapOff" value="0" checked>
+              <label for="benefitInfoGapOff">Assume no benefit info gap</label>
+              <input type="radio" name="benefitInfoGapChoice" id="benefitInfoGapOn" value="35">
+              <label for="benefitInfoGapOn">Benefit info gap exists</label>
+            </div>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="label">Free-market quantity</div>
-          <div class="num" id="qmStat"></div>
+            <div class="hint">Adjust external benefits and underestimation of benefits together.</div>
+          </div>
         </div>
-        <div class="stat">
-          <div class="label">Socially optimal quantity</div>
-          <div class="num" id="qsStat"></div>
+
+        <div class="buttons">
+          <button class="secondary" id="nogaps">Allocative Efficiency (No Gaps)</button>
         </div>
-        <div class="stat">
-          <div class="label">Total gap per unit</div>
-          <div class="num" id="gapStat"></div>
-        </div>
-        <div class="stat">
-          <div class="label">Deadweight loss</div>
-          <div class="num" id="dwlStat"></div>
+
+        <div class="legend">
+          <div class="leg"><span class="sw" style="background:var(--cost)"></span>Cost curves: MPC, MSC</div>
+          <div class="leg"><span class="sw" style="background:var(--benefit)"></span>Benefit curves: MPB, MSB</div>
+          <div class="leg"><span class="sw" style="background:repeating-linear-gradient(90deg,var(--cost),var(--cost) 7px,transparent 7px,transparent 12px)"></span>Perceived cost</div>
+          <div class="leg"><span class="sw" style="background:repeating-linear-gradient(90deg,var(--benefit),var(--benefit) 7px,transparent 7px,transparent 12px)"></span>Perceived benefit</div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="feedback" id="feedback"></div>
-    </section>
-  </main>
+<script>
+const svg = document.getElementById('chart');
+const gapChoices = {
+  externalCost: 'externalCostChoice',
+  externalBenefit: 'externalBenefitChoice',
+  costInfoGap: 'costInfoGapChoice',
+  benefitInfoGap: 'benefitInfoGapChoice'
+};
+const vals = {
+  externalCost: document.getElementById('externalCostVal'),
+  externalBenefit: document.getElementById('externalBenefitVal'),
+  costInfoGap: document.getElementById('costInfoGapVal'),
+  benefitInfoGap: document.getElementById('benefitInfoGapVal')
+};
+function getGapState(){
+  return Object.fromEntries(
+    Object.entries(gapChoices).map(([key,name])=>{
+      const selected = document.querySelector(`input[name="${name}"]:checked`);
+      return [key, selected ? +selected.value : 0];
+    })
+  );
+}
+function setGapState(values){
+  Object.entries(gapChoices).forEach(([key,name])=>{
+    const targetValue = values[key] || 0;
+    const input = document.querySelector(`input[name="${name}"][value="${targetValue}"]`) || document.querySelector(`input[name="${name}"][value="0"]`);
+    if(input) input.checked = true;
+  });
+}
+// No summary box is currently used in this version.
 
-  <p class="footer-note">Teaching tip: students should explain the chain from perceived private decision-making to market output, then compare it with the socially optimal output after including both information failure and external effects.</p>
+const W = 860, H = 590;
+const margin = {left:82,right:88,top:50,bottom:78};
+const x0 = margin.left, y0 = H-margin.bottom, plotW = W-margin.left-margin.right, plotH = H-margin.top-margin.bottom;
+const qMax = 160, pMax = 180;
+const x = q => x0 + q/qMax*plotW;
+const y = p => y0 - p/pMax*plotH;
 
-  <script>
-    const canvas = document.getElementById('graph');
-    const ctx = canvas.getContext('2d');
+function priceAt(curve, q, s){
+  const externalCost = +s.externalCost;
+  const externalBenefit = +s.externalBenefit;
+  const costInfoGap = +s.costInfoGap;
+  const benefitInfoGap = +s.benefitInfoGap;
+  if(curve==='MPC') return 20 + 0.9*q;
+  if(curve==='MSC') return 20 + (externalCost ? 35 : 0) + 0.9*q;
+  if(curve==='PERCEIVED_COST') return Math.max(0, 20 - (costInfoGap ? 35 : 0) + 0.9*q);
+  if(curve==='MPB') return 160 - 0.9*q;
+  if(curve==='MSB') return 160 + (externalBenefit ? 35 : 0) - 0.9*q;
+  if(curve==='PERCEIVED_BENEFIT') return Math.max(0, 160 - (benefitInfoGap ? 35 : 0) - 0.9*q);
+}
 
-    const els = {
-      costSideBtn: document.getElementById('costSideBtn'),
-      benefitSideBtn: document.getElementById('benefitSideBtn'),
-      resetBtn: document.getElementById('resetBtn'),
-      demandIntercept: document.getElementById('demandIntercept'),
-      supplyIntercept: document.getElementById('supplyIntercept'),
-      externality: document.getElementById('externality'),
-      infoGap: document.getElementById('infoGap'),
-      demandInterceptValue: document.getElementById('demandInterceptValue'),
-      supplyInterceptValue: document.getElementById('supplyInterceptValue'),
-      externalityValue: document.getElementById('externalityValue'),
-      infoGapValue: document.getElementById('infoGapValue'),
-      graphTitle: document.getElementById('graphTitle'),
-      graphSubtitle: document.getElementById('graphSubtitle'),
-      outcomeBadge: document.getElementById('outcomeBadge'),
-      qmStat: document.getElementById('qmStat'),
-      qsStat: document.getElementById('qsStat'),
-      gapStat: document.getElementById('gapStat'),
-      dwlStat: document.getElementById('dwlStat'),
-      feedback: document.getElementById('feedback'),
-      legend: document.getElementById('legend')
-    };
+function intersect(upCurve, downCurve, s){
+  let bestQ=0, bestGap=Infinity;
+  for(let q=0;q<=qMax;q+=0.1){
+    const gap = Math.abs(priceAt(upCurve,q,s)-priceAt(downCurve,q,s));
+    if(gap<bestGap){bestGap=gap;bestQ=q;}
+  }
+  const p = (priceAt(upCurve,bestQ,s)+priceAt(downCurve,bestQ,s))/2;
+  return {q:bestQ,p};
+}
 
-    let mode = 'cost';
+function linePath(curve, s){
+  let d='';
+  for(let q=0;q<=qMax;q+=2){
+    d += (q===0?'M':'L') + x(q).toFixed(1)+' '+y(priceAt(curve,q,s)).toFixed(1)+' ';
+  }
+  return d;
+}
 
-    function money(x) { return '$' + Math.max(0, x).toFixed(0); }
-    function qty(x) { return Math.max(0, x).toFixed(1); }
+function el(tag, attrs={}, content=''){
+  const node=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  Object.entries(attrs).forEach(([k,v])=>node.setAttribute(k,v));
+  if(content) node.textContent=content;
+  return node;
+}
 
-    function getParams() {
-      return {
-        A: Number(els.demandIntercept.value),
-        C: Number(els.supplyIntercept.value),
-        ext: Number(els.externality.value),
-        info: Number(els.infoGap.value),
-        dSlope: 1,
-        sSlope: 1
-      };
-    }
+function addText(g, txt, px, py, opts={}){
+  const t = el('text', {
+    x:px, y:py,
+    'font-size':opts.size||13,
+    'font-weight':opts.weight||750,
+    fill:opts.fill||'#111827',
+    'text-anchor':opts.anchor||'middle'
+  }, txt);
+  g.appendChild(t);
+  return t;
+}
 
-    function mpbPerceived(q, p) { return p.A - p.dSlope * q; }
-    function mpbActual(q, p) { return mpbPerceived(q, p) + p.info; }
-    function msb(q, p) { return mpbActual(q, p) + p.ext; }
+function addLabelBox(g, txt, px, py, color, anchor='start', rotate=0){
+  const group = el('g', {
+    transform:`rotate(${rotate} ${px} ${py})`
+  });
 
-    function mpcPerceived(q, p) { return p.C + p.sSlope * q; }
-    function mpcActual(q, p) { return mpcPerceived(q, p) + p.info; }
-    function msc(q, p) { return mpcActual(q, p) + p.ext; }
+  const text = el('text', {
+    x:px,
+    y:py,
+    'font-size':12,
+    'font-weight':850,
+    fill:color,
+    'text-anchor':anchor
+  }, txt);
 
-    function intersection(a1, b1, a2, b2) {
-      const q = (a2 - a1) / (b1 - b2);
-      const price = a1 + b1 * q;
-      return { q: Math.max(0, q), price: Math.max(0, price) };
-    }
+  group.appendChild(text);
+  g.appendChild(group);
+}
 
-    function compute() {
-      const p = getParams();
-      const market = intersection(p.A, -p.dSlope, p.C, p.sSlope);
+function addCurve(g, curve, s, color, label, qLabel, offsetY=0, dash='', width=3.4, opacity=1, rotation=0){
+  g.appendChild(el('path',{
+    d:linePath(curve,s),
+    fill:'none',
+    stroke:color,
+    'stroke-width':width,
+    'stroke-dasharray':dash,
+    'stroke-linecap':'round',
+    opacity
+  }));
 
-      // Intersection using actual private cost/benefit before externalities
-      let actualPrivate;
+  addLabelBox(
+    g,
+    label,
+    x(qLabel)+12,
+    y(priceAt(curve,qLabel,s))+offsetY,
+    color,
+    'start',
+    rotation
+  );
+}
 
-      let social;
-      if (mode === 'cost') {
-        actualPrivate = intersection(p.A, -p.dSlope, p.C + p.info, p.sSlope);
-        social = intersection(p.A, -p.dSlope, p.C + p.info + p.ext, p.sSlope);
-      } else {
-        actualPrivate = intersection(p.A + p.info, -p.dSlope, p.C, p.sSlope);
-        social = intersection(p.A + p.info + p.ext, -p.dSlope, p.C, p.sSlope);
-      }
+function addPoint(g, pt, label, color, dx=0, dy=-16){
+  g.appendChild(el('line',{x1:x(pt.q),x2:x(pt.q),y1:y0,y2:y(pt.p),stroke:color,'stroke-width':1.4,'stroke-dasharray':'5 5',opacity:.8}));
+  g.appendChild(el('circle',{cx:x(pt.q),cy:y(pt.p),r:6.5,fill:color,stroke:'white','stroke-width':2.2}));
+  addLabelBox(g,label,x(pt.q)+dx,y(pt.p)+dy,color, dx < 0 ? 'end' : 'start');
+}
 
-      const totalGap = p.info + p.ext;
-      const quantityGap = Math.abs(market.q - social.q);
-      const dwl = 0.5 * totalGap * quantityGap;
-      return { p, market, actualPrivate, social, totalGap, quantityGap, dwl };
-    }
+function addVerticalGap(g, q, curveA, curveB, s, color, label, side='right'){
+  const p1 = priceAt(curveA,q,s), p2 = priceAt(curveB,q,s);
+  const top = Math.max(p1,p2), bottom = Math.min(p1,p2);
+  const px = x(q);
+  const midY = (y(top)+y(bottom))/2;
 
-    function xScale(q) {
-      const left = 70, right = canvas.width - 35;
-      return left + (q / 170) * (right - left);
-    }
+  if(Math.abs(top - bottom) < 0.5) return;
 
-    function yScale(price) {
-      const top = 35, bottom = canvas.height - 70;
-      return bottom - (price / 260) * (bottom - top);
-    }
+  const markerId = `arrow-${color.replace('#','')}`;
 
-    function drawAxes() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.strokeStyle = '#111827';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(xScale(0), yScale(0));
-      ctx.lineTo(xScale(170), yScale(0));
-      ctx.moveTo(xScale(0), yScale(0));
-      ctx.lineTo(xScale(0), yScale(250));
-      ctx.stroke();
-      ctx.fillStyle = '#111827';
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText('Price / Monetary value ($)', xScale(0) - 48, yScale(250) - 12);
-      ctx.fillText('Quantity', xScale(158), yScale(0) + 42);
-      ctx.strokeStyle = '#edf0f4';
-      ctx.lineWidth = 1;
-      ctx.font = '12px Arial';
-      ctx.fillStyle = '#6b7280';
-      for (let q = 25; q <= 150; q += 25) {
-        ctx.beginPath();
-        ctx.moveTo(xScale(q), yScale(0));
-        ctx.lineTo(xScale(q), yScale(250));
-        ctx.stroke();
-        ctx.fillText(q, xScale(q) - 8, yScale(0) + 22);
-      }
-      for (let price = 50; price <= 250; price += 50) {
-        ctx.beginPath();
-        ctx.moveTo(xScale(0), yScale(price));
-        ctx.lineTo(xScale(170), yScale(price));
-        ctx.stroke();
-        ctx.fillText('$' + price, xScale(0) - 45, yScale(price) + 4);
-      }
-    }
-
-    function drawLine(fn, p, color, label, dash = []) {
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 3;
-      ctx.setLineDash(dash);
-      ctx.beginPath();
-      for (let q = 0; q <= 170; q += 1) {
-        const x = xScale(q);
-        const y = yScale(fn(q, p));
-        if (q === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = color;
-      ctx.font = 'bold 13px Arial';
-      const labelQ = label.includes('MSB') ? 68 : label.includes('actual') ? 95 : label.includes('MSC') ? 108 : label.includes('MPC') ? 122 : 30;
-      ctx.fillText(label, xScale(labelQ), yScale(fn(labelQ, p)) - 8);
-      ctx.restore();
-    }
-
-    function drawGuides(point, color, text, quantityLabel, priceLabel) {
-      ctx.save();
-      ctx.strokeStyle = color;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([6, 5]);
-      ctx.beginPath();
-      ctx.moveTo(xScale(point.q), yScale(0));
-      ctx.lineTo(xScale(point.q), yScale(point.price));
-      ctx.lineTo(xScale(0), yScale(point.price));
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      ctx.arc(xScale(point.q), yScale(point.price), 5, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.font = 'bold 13px Arial';
-      ctx.fillText(text, xScale(point.q) + 8, yScale(point.price) - 8);
-
-      // Label quantities on horizontal axis
-      ctx.font = 'bold 14px Arial';
-      ctx.fillText(quantityLabel, xScale(point.q) - 10, yScale(0) + 40);
-
-      // Label prices on vertical axis
-      ctx.fillText(priceLabel, xScale(0) - 38, yScale(point.price) + 5);
-      ctx.restore();
-    }
-
-    function drawDwl(data) {
-      const { p, market, social } = data;
-      const q1 = Math.min(market.q, social.q);
-      const q2 = Math.max(market.q, social.q);
-      ctx.save();
-      ctx.fillStyle = 'rgba(220, 38, 38, 0.18)';
-      ctx.strokeStyle = 'rgba(220, 38, 38, 0.65)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      if (mode === 'cost') {
-        ctx.moveTo(xScale(q1), yScale(mpbPerceived(q1, p)));
-        ctx.lineTo(xScale(q2), yScale(mpbPerceived(q2, p)));
-        ctx.lineTo(xScale(q2), yScale(msc(q2, p)));
-      } else {
-        ctx.moveTo(xScale(q1), yScale(mpcPerceived(q1, p)));
-        ctx.lineTo(xScale(q1), yScale(msb(q1, p)));
-        ctx.lineTo(xScale(q2), yScale(mpcPerceived(q2, p)));
-      }
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      const labelQ = (q1 + q2) / 2;
-      const labelP = mode === 'cost'
-        ? (mpbPerceived(labelQ, p) + msc(labelQ, p)) / 2
-        : (mpcPerceived(labelQ, p) + msb(labelQ, p)) / 2;
-      ctx.fillStyle = '#991b1b';
-      ctx.font = 'bold 13px Arial';
-      ctx.fillText('DWL', xScale(labelQ) + 5, yScale(labelP));
-      ctx.restore();
-    }
-
-    function updateLegend() {
-      const items = mode === 'cost'
-        ? [
-          ['#2563eb', 'MPB = MSB / demand'],
-          ['#059669', 'MPC perceived'],
-          ['#f59e0b', 'MPC actual'],
-          ['#dc2626', 'MSC = actual MPC + MEC']
-        ]
-        : [
-          ['#2563eb', 'MPB perceived'],
-          ['#f59e0b', 'MPB actual'],
-          ['#7c3aed', 'MSB = actual MPB + MEB'],
-          ['#059669', 'MPC = MSC / supply']
-        ];
-      els.legend.innerHTML = items.map(([color, text]) => `<span class="key"><span class="swatch" style="background:${color}"></span>${text}</span>`).join('');
-    }
-
-    function render() {
-      const data = compute();
-      const { p, market, actualPrivate, social, totalGap, dwl } = data;
-      els.demandInterceptValue.textContent = money(p.A);
-      els.supplyInterceptValue.textContent = money(p.C);
-      els.externalityValue.textContent = money(p.ext);
-      els.infoGapValue.textContent = money(p.info);
-      drawAxes();
-      drawDwl(data);
-
-      if (mode === 'cost') {
-        drawLine(mpbPerceived, p, '#2563eb', 'MPB = MSB');
-        drawLine(mpcPerceived, p, '#059669', 'MPC perceived');
-        drawLine(mpcActual, p, '#f59e0b', 'MPC actual', [7, 5]);
-        drawLine(msc, p, '#dc2626', 'MSC');
-        els.graphTitle.textContent = 'Cost-side market failure: external cost + information gap';
-        els.graphSubtitle.textContent = 'Actual MPC is above perceived MPC, and MSC is further above actual MPC due to external cost.';
-        els.outcomeBadge.textContent = 'Overconsumption';
-      } else {
-        drawLine(mpbPerceived, p, '#2563eb', 'MPB perceived');
-        drawLine(mpbActual, p, '#f59e0b', 'MPB actual', [7, 5]);
-        drawLine(msb, p, '#7c3aed', 'MSB');
-        drawLine(mpcPerceived, p, '#059669', 'MPC = MSC');
-        els.graphTitle.textContent = 'Benefit-side market failure: external benefit + information gap';
-        els.graphSubtitle.textContent = 'Actual MPB is above perceived MPB, and MSB is further above actual MPB due to external benefit.';
-        els.outcomeBadge.textContent = 'Underconsumption';
-      }
-
-      drawGuides(market, '#111827', 'Market equilibrium', mode === 'cost' ? 'Q2' : 'Q0', mode === 'cost' ? 'P2' : 'P0');
-      drawGuides(actualPrivate, '#f59e0b', mode === 'cost' ? 'MPB = MPC actual' : 'MPB actual = MPC', 'Q1', 'P1');
-      drawGuides(social, '#dc2626', 'MSC = MSB', 'Qs', 'Ps');
-      els.qmStat.textContent = qty(market.q);
-      els.qsStat.textContent = qty(social.q);
-      els.gapStat.textContent = money(totalGap) + ' per unit';
-      els.dwlStat.textContent = money(dwl);
-
-      if (mode === 'cost') {
-        const over = Math.max(0, market.q - social.q);
-        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPC</strong>, so it produces where perceived MPB = perceived MPC. However, actual MPC is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSC is another <strong>${money(p.ext)}</strong> higher because of external cost. Total unaccounted cost is <strong>${money(totalGap)} per unit</strong>, causing overconsumption of <strong>${qty(over)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
-      } else {
-        const under = Math.max(0, social.q - market.q);
-        els.feedback.innerHTML = `<strong>Feedback:</strong> The free market uses <strong>perceived MPB</strong>, so it consumes where perceived MPB = MPC. However, actual MPB is <strong>${money(p.info)}</strong> higher because of imperfect information, and MSB is another <strong>${money(p.ext)}</strong> higher because of external benefit. Total unaccounted benefit is <strong>${money(totalGap)} per unit</strong>, causing underconsumption of <strong>${qty(under)} units</strong> and deadweight loss of <strong>${money(dwl)}</strong>.`;
-      }
-      updateLegend();
-    }
-
-    function setMode(newMode) {
-      mode = newMode;
-      els.costSideBtn.classList.toggle('active', mode === 'cost');
-      els.benefitSideBtn.classList.toggle('active', mode === 'benefit');
-      render();
-    }
-
-    els.costSideBtn.addEventListener('click', () => setMode('cost'));
-    els.benefitSideBtn.addEventListener('click', () => setMode('benefit'));
-    [els.demandIntercept, els.supplyIntercept, els.externality, els.infoGap].forEach(slider => slider.addEventListener('input', render));
-    els.resetBtn.addEventListener('click', () => {
-      els.demandIntercept.value = 170;
-      els.supplyIntercept.value = 35;
-      els.externality.value = 25;
-      els.infoGap.value = 20;
-      setMode('cost');
+  if(!document.getElementById(markerId)){
+    const marker=el('marker',{
+      id:markerId,
+      viewBox:'0 0 10 10',
+      refX:'5',
+      refY:'5',
+      markerWidth:'4.5',
+      markerHeight:'4.5',
+      orient:'auto-start-reverse'
     });
 
-    render();
-  </script>
+    marker.appendChild(el('path',{
+      d:'M 0 0 L 10 5 L 0 10 z',
+      fill:color
+    }));
+
+    const defsNode = svg.querySelector('defs') || svg.insertBefore(el('defs'), svg.firstChild);
+    defsNode.appendChild(marker);
+  }
+
+  g.appendChild(el('line',{
+    x1:px,
+    x2:px,
+    y1:y(top),
+    y2:y(bottom),
+    stroke:color,
+    'stroke-width':4,
+    'marker-start':`url(#${markerId})`,
+    'marker-end':`url(#${markerId})`,
+    opacity:.9
+  }));
+
+  const labelX = side === 'left' ? px-22 : px+22;
+
+  addLabelBox(
+    g,
+    label,
+    labelX,
+    midY,
+    color,
+    side === 'left' ? 'end' : 'start',
+    -90
+  );
+}
+
+function addDWL(g, s, chosenEq, socialEq){
+  const qA = Math.min(chosenEq.q, socialEq.q);
+  const qB = Math.max(chosenEq.q, socialEq.q);
+
+  if(Math.abs(qB - qA) < 1) return;
+
+  // DWL is always based on true social cost and true social benefit.
+  // If chosen quantity is above Qs, MSC > MSB over the excess units.
+  // If chosen quantity is below Qs, MSB > MSC over the missing units.
+  const topCurve = chosenEq.q > socialEq.q ? 'MSC' : 'MSB';
+  const bottomCurve = chosenEq.q > socialEq.q ? 'MSB' : 'MSC';
+
+  let topPath = '';
+  let bottomPath = '';
+  const steps = 36;
+
+  for(let i=0;i<=steps;i++){
+    const q = qA + (qB-qA)*i/steps;
+    topPath += `${i===0?'M':'L'} ${x(q).toFixed(1)} ${y(priceAt(topCurve,q,s)).toFixed(1)} `;
+  }
+
+  for(let i=steps;i>=0;i--){
+    const q = qA + (qB-qA)*i/steps;
+    bottomPath += `L ${x(q).toFixed(1)} ${y(priceAt(bottomCurve,q,s)).toFixed(1)} `;
+  }
+
+  g.appendChild(el('path',{
+    d:topPath + bottomPath + 'Z',
+    fill:'#dc2626',
+    opacity:.18,
+    stroke:'#dc2626',
+    'stroke-width':1.5,
+    'stroke-dasharray':'4 4'
+  }));
+
+  const qMid = (qA + qB)/2;
+  const pMid = (priceAt(topCurve,qMid,s)+priceAt(bottomCurve,qMid,s))/2;
+  addLabelBox(g,'DWL',x(qMid)+4,y(pMid), '#dc2626','start',0);
+}
+
+function draw(){
+  const s = getGapState();
+  Object.keys(vals).forEach(k=>{
+    vals[k].textContent = s[k] === 0 ? 'No gap assumed' : 'Gap exists';
+  });
+  svg.innerHTML='';
+
+  const defs=el('defs');
+  svg.appendChild(defs);
+
+  const g=el('g'); svg.appendChild(g);
+
+  for(let i=0;i<=8;i++){
+    const q=i*qMax/8, p=i*pMax/8;
+    g.appendChild(el('line',{x1:x(q),x2:x(q),y1:margin.top,y2:y0,stroke:'#eef2f7','stroke-width':1}));
+    g.appendChild(el('line',{x1:x0,x2:W-margin.right,y1:y(p),y2:y(p),stroke:'#eef2f7','stroke-width':1}));
+  }
+
+  g.appendChild(el('line',{x1:x0,x2:x0,y1:margin.top,y2:y0,stroke:'#111827','stroke-width':2.2}));
+  g.appendChild(el('line',{x1:x0,x2:W-margin.right,y1:y0,y2:y0,stroke:'#111827','stroke-width':2.2}));
+  addText(g,'Price / Cost / Benefit',30,280,{anchor:'middle',size:13,weight:850}).setAttribute('transform','rotate(-90 30 280)');
+  addText(g,'Quantity',W/2,y0+52,{size:14,weight:850});
+
+  
+
+  const cost = '#ef4444';
+  const benefit = '#2563eb';
+
+  // curves: same colour family, different line styles
+  addCurve(g,'MSC',s,cost,'MSC',150,-8,'',3.7,1,-28);
+  addCurve(g,'MPC',s,cost,'MPC',148,10,'',2.8,.82,-28);
+  addCurve(g,'PERCEIVED_COST',s,cost,'Perceived cost',144,28,'8 7',2.8,.68,-28);
+
+  addCurve(g,'MSB',s,benefit,'MSB',146,-26,'',3.7,1,28);
+  addCurve(g,'MPB',s,benefit,'MPB',144,-6,'',2.8,.82,28);
+  addCurve(g,'PERCEIVED_BENEFIT',s,benefit,'Perceived benefit',138,18,'8 7',2.8,.68,28);
+
+  const privateEq = intersect('MPC','MPB',s);
+  const socialEq = intersect('MSC','MSB',s);
+  const perceivedEq = intersect('PERCEIVED_COST','PERCEIVED_BENEFIT',s);
+
+  // Chosen quantity is based on perceived cost and perceived benefit.
+  // When there are no information gaps, this is the same as the private market equilibrium.
+  addDWL(g, s, perceivedEq, socialEq);
+
+  // Vertical guide lines for all key intersections
+  const intersections = [
+    {
+      eq: privateEq,
+      color:'#64748b',
+      label:'Q market'
+    },
+    {
+      eq: perceivedEq,
+      color:'#ea580c',
+      label:'Q perceived'
+    },
+    {
+      eq: socialEq,
+      color:'#7c3aed',
+      label:'Qs'
+    }
+  ];
+
+  intersections.forEach(({eq,color,label})=>{
+    g.appendChild(el('line',{
+      x1:x(eq.q),
+      x2:x(eq.q),
+      y1:y0,
+      y2:y(eq.p),
+      stroke:color,
+      'stroke-width':2,
+      'stroke-dasharray':'7 7',
+      opacity:.9
+    }));
+
+    addText(g,label,x(eq.q),y0+24,{
+      fill:color,
+      anchor:'middle',
+      size:12,
+      weight:850
+    });
+  });
+
+  addVerticalGap(g, 42, 'MSC', 'MPC', s, cost, 'External cost', 'right');
+  addVerticalGap(g, 42, 'MPC', 'PERCEIVED_COST', s, cost, 'Cost info gap', 'left');
+  addVerticalGap(g, 42, 'MSB', 'MPB', s, benefit, 'External benefit', 'right');
+  addVerticalGap(g, 42, 'MPB', 'PERCEIVED_BENEFIT', s, benefit, 'Benefit info gap', 'left');
+
+  const direction = perceivedEq.q > socialEq.q
+    ? 'Overconsumption'
+    : perceivedEq.q < socialEq.q
+      ? 'Underconsumption'
+      : 'Allocative Efficiency';
+
+  addText(g,direction,W/2,36,{
+    fill: direction === 'Overconsumption' ? '#dc2626' : direction === 'Underconsumption' ? '#2563eb' : '#16a34a',
+    size:20,
+    weight:900,
+    anchor:'middle'
+  });
+}
+
+document.querySelectorAll('.choice-row input').forEach(input=>input.addEventListener('change',draw));
+
+
+document.getElementById('nogaps').addEventListener('click',()=>{
+  setGapState({
+    externalCost:0,
+    externalBenefit:0,
+    costInfoGap:0,
+    benefitInfoGap:0
+  });
+  draw();
+});
+
+draw();
+</script>
 </body>
 </html>
