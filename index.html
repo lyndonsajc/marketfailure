@@ -87,6 +87,11 @@
       box-shadow:0 8px 18px rgba(15,23,42,.18);
     }
     button.secondary{background:#e5e7eb;color:#111827;box-shadow:none}
+    button.secondary.active{
+      background:#111827;
+      color:white;
+      box-shadow:0 8px 18px rgba(15,23,42,.18);
+    }
     .buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
     .tag{font-size:12px;color:#475569;background:#eef2ff;border:1px solid #c7d2fe;border-radius:999px;padding:4px 8px;display:inline-block;margin-top:8px}
     @media(max-width:900px){.grid{grid-template-columns:1fr}.legend{grid-template-columns:1fr}}
@@ -106,6 +111,10 @@
       </div>
 
       <div class="panel">
+        <div class="buttons" style="margin-bottom:14px">
+          <button class="secondary active" id="nogaps">Allocative Efficiency (No Gaps)</button>
+        </div>
+
         <div class="controls">
           <div class="control cost">
             <div class="row"><label>Cost-side market failure</label></div>
@@ -152,9 +161,7 @@
           </div>
         </div>
 
-        <div class="buttons">
-          <button class="secondary" id="nogaps">Allocative Efficiency (No Gaps)</button>
-        </div>
+        
 
         <div class="legend">
           <div class="leg"><span class="sw" style="background:var(--cost)"></span>Cost curves: MPC, MSC</div>
@@ -498,10 +505,14 @@ function draw(){
   });
 }
 
-document.querySelectorAll('.choice-row input').forEach(input=>input.addEventListener('change',draw));
+document.querySelectorAll('.choice-row input').forEach(input=>input.addEventListener('change',()=>{
+  document.getElementById('nogaps').classList.remove('active');
+  draw();
+}));
 
 
 document.getElementById('nogaps').addEventListener('click',()=>{
+  document.getElementById('nogaps').classList.add('active');
   setGapState({
     externalCost:0,
     externalBenefit:0,
